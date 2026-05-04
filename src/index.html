@@ -43,11 +43,14 @@
         }
 
         .cell {
-            padding: 8px;
-            border: 1px solid var(--v-border);
-            text-align: left;
+            border-right: 1px solid #ffffff0d;
+            border-bottom: 1px solid #ffffff0d;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            white-space: nowrap;
+            height: 80px;
             position: relative;
-            transition: background-color 1.2s ease-in-out, border-color 0.4s ease-in-out, color 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            transition: background-color 0.2s;
         }
 
         .w-scenario {
@@ -163,11 +166,6 @@
         }
         input[type=number] {
             -moz-appearance: textfield;
-        }
-        /* View Transitions smoothness */
-        ::view-transition-old(root),
-        ::view-transition-new(root) {
-            animation-duration: 0.8s;
         }
     </style>
 </head>
@@ -327,7 +325,6 @@
             if (!tasks[taskIndex].months[monthKey]) tasks[taskIndex].months[monthKey] = { days: {}, stats: {} };
             tasks[taskIndex].months[monthKey].days[dayIndex] = val;
             saveData();
-            setTimeout(render, 50);
         }
 
         function updateStat(taskIndex, statIndex, val) {
@@ -337,7 +334,6 @@
             if (!tasks[taskIndex].months[monthKey]) tasks[taskIndex].months[monthKey] = { days: {}, stats: {} };
             tasks[taskIndex].months[monthKey].stats[statIndex] = cleanVal;
             saveData();
-            setTimeout(render, 50);
         }
 
         function getMonthBaseGoal(taskIndex, monthKey) {
@@ -623,7 +619,7 @@
 
                         bodyHtml += `<td class="cell w-day !p-0 overflow-hidden ${cellClass}">
                             <div class="flex items-center justify-center h-full px-2">
-                                <div contenteditable="true" spellcheck="false" onblur="updateDay(${taskIndex}, ${dayIndex}, this.innerText)" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden">${currentValStr}</div>
+                                <div contenteditable="true" spellcheck="false" onblur="updateDay(${taskIndex}, ${dayIndex}, this.innerText); render()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden">${currentValStr}</div>
                             </div>
                         </td>`;
                         dayIndex++;
@@ -638,7 +634,7 @@
                         
                         bodyHtml += `<td class="cell w-stat !bg-[#6366f120] !text-[#6366f1] overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
                             <div class="flex flex-col items-center justify-center h-full gap-1">
-                                <div contenteditable="true" spellcheck="false" onblur="validatePercent(this); updateStat(${taskIndex}, ${blockIndex}, this.innerText)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[9px] opacity-60 hover:opacity-100 transition-opacity whitespace-nowrap">${blockTarget}%</div>
+                                <div contenteditable="true" spellcheck="false" onblur="validatePercent(this); updateStat(${taskIndex}, ${blockIndex}, this.innerText); render()" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[9px] opacity-60 hover:opacity-100 transition-opacity whitespace-nowrap">${blockTarget}%</div>
                                 <div class="w-full text-center text-[10px] font-bold whitespace-nowrap">${currentGoal}</div>
                             </div>
                         </td>`;
@@ -646,45 +642,7 @@
                 });
                 bodyHtml += `</tr>`;
             });
-
-            const temp = document.createElement('tbody');
-            temp.innerHTML = bodyHtml;
-
-            const existingRows = tbody.children;
-            const newRows = temp.children;
-
-            if (existingRows.length !== newRows.length) {
-                tbody.innerHTML = bodyHtml;
-            } else {
-                for (let i = 0; i < existingRows.length; i++) {
-                    const existingCells = Array.from(existingRows[i].children);
-                    const newCells = Array.from(newRows[i].children);
-                    
-                    newCells.forEach((newCell, j) => {
-                        const existingCell = existingCells[j];
-                        
-                        // Smart update class
-                        if (existingCell.className !== newCell.className) {
-                            existingCell.className = newCell.className;
-                        }
-                        
-                        // Smart update content
-                        const existingEdit = existingCell.querySelector('[contenteditable]');
-                        const newEdit = newCell.querySelector('[contenteditable]');
-                        
-                        if (existingEdit && newEdit) {
-                            if (existingEdit.innerText !== newEdit.innerText) {
-                                existingEdit.innerText = newEdit.innerText;
-                            }
-                        } else if (!existingEdit && !newEdit) {
-                            if (existingCell.innerHTML !== newCell.innerHTML) {
-                                existingCell.innerHTML = newCell.innerHTML;
-                            }
-                        }
-                    });
-                }
-            }
-
+            tbody.innerHTML = bodyHtml;
             lucide.createIcons();
         }
 
