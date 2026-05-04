@@ -157,6 +157,16 @@
             background-color: rgba(99, 102, 241, 0.4);
             color: white;
         }
+
+        /* Hide number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 
@@ -196,6 +206,47 @@
             <div class="flex justify-end gap-3">
                 <button id="modal-cancel" class="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold uppercase transition-colors">Cancelar</button>
                 <button id="modal-confirm" class="px-4 py-2 bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 rounded-lg text-xs font-bold uppercase transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Initial Score Calculator Modal -->
+    <div id="calc-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] opacity-0 pointer-events-none transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-v-surface border border-v-border p-6 rounded-xl max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-300" id="calc-modal-content">
+            <h3 class="text-v-radiant font-bold text-lg mb-2 uppercase tracking-wider text-center">Promedio Inicial</h3>
+            <p class="text-slate-400 text-[10px] mb-6 text-center uppercase">Ingresa 3 puntuaciones para calcular el promedio</p>
+            
+            <div class="flex justify-between gap-4 mb-8">
+                <input type="number" id="calc-v1" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+                <input type="number" id="calc-v2" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+                <input type="number" id="calc-v3" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+            </div>
+
+            <div class="bg-v-radiant/10 border border-v-radiant/20 p-4 rounded-lg mb-8 text-center">
+                <div class="text-slate-400 text-[10px] uppercase mb-1">Promedio Resultante</div>
+                <div class="text-2xl font-bold text-v-radiant" id="calc-result">0.0</div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Percentage Modal -->
+    <div id="goal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] opacity-0 pointer-events-none transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-v-surface border border-v-border p-6 rounded-xl max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-300" id="goal-modal-content">
+            <h3 class="text-v-radiant font-bold text-lg mb-2 uppercase tracking-wider text-center">Configurar Objetivo</h3>
+            <p class="text-slate-400 text-[10px] mb-6 text-center uppercase">Establece el incremento porcentual para tu meta</p>
+            
+            <div class="bg-black/40 border border-v-border rounded-xl p-8 mb-8 text-center">
+                <div class="flex items-center justify-center gap-2">
+                    <input type="number" id="goal-input" min="0" onkeydown="if(event.key==='-')event.preventDefault()" step="0.1" placeholder="1.0" class="w-24 bg-transparent text-center text-4xl text-white font-bold outline-none">
+                    <span class="text-4xl text-v-radiant font-bold">%</span>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button id="goal-cancel" class="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold uppercase transition-colors">Cancelar</button>
+                <button id="goal-apply" class="px-6 py-2 bg-v-radiant/20 text-v-radiant border border-v-radiant/50 hover:bg-v-radiant/40 rounded-lg text-xs font-bold uppercase transition-colors">Aplicar</button>
             </div>
         </div>
     </div>
@@ -239,6 +290,7 @@
                 name: "NUEVA TAREA",
                 color: color,
                 initial: 0,
+                target: 1.0, // Default 1%
                 days: {},
                 stats: {} // For the 1% columns
             });
@@ -297,6 +349,75 @@
 
             confirmBtn.onclick = () => {
                 onConfirm();
+                close();
+            };
+
+            cancelBtn.onclick = close;
+            modal.onclick = (e) => { if (e.target === modal) close(); };
+        }
+
+        function openCalcModal(taskIndex) {
+            const modal = document.getElementById('calc-modal');
+            const content = document.getElementById('calc-modal-content');
+            const inputs = ['calc-v1', 'calc-v2', 'calc-v3'].map(id => document.getElementById(id));
+            const resultEl = document.getElementById('calc-result');
+            const applyBtn = document.getElementById('calc-apply');
+            const cancelBtn = document.getElementById('calc-cancel');
+
+            inputs.forEach(input => {
+                input.value = '';
+                input.oninput = () => {
+                    const vals = inputs.map(i => parseFloat(i.value) || 0).filter(v => v > 0);
+                    const avg = vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+                    resultEl.innerText = avg.toFixed(1);
+                };
+            });
+            resultEl.innerText = '0.0';
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95', 'opacity-0');
+
+            const close = () => {
+                content.classList.add('scale-95', 'opacity-0');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            applyBtn.onclick = () => {
+                const finalAvg = parseFloat(resultEl.innerText);
+                updateTaskInit(taskIndex, finalAvg);
+                close();
+            };
+
+            cancelBtn.onclick = close;
+            modal.onclick = (e) => { if (e.target === modal) close(); };
+        }
+
+        function openGoalModal(taskIndex) {
+            const modal = document.getElementById('goal-modal');
+            const content = document.getElementById('goal-modal-content');
+            const input = document.getElementById('goal-input');
+            const applyBtn = document.getElementById('goal-apply');
+            const cancelBtn = document.getElementById('goal-cancel');
+
+            input.value = tasks[taskIndex].target || 1.0;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95', 'opacity-0');
+
+            const close = () => {
+                content.classList.add('scale-95', 'opacity-0');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            applyBtn.onclick = () => {
+                let val = parseFloat(input.value);
+                if (isNaN(val)) val = 1.0;
+                if (val < 0) val = 0;
+                if (val > 100) val = 100;
+                
+                tasks[taskIndex].target = val;
+                saveData();
+                render();
                 close();
             };
 
@@ -393,7 +514,8 @@
 
             let bodyHtml = '';
             tasks.forEach((task, taskIndex) => {
-                const goalValue = (task.initial * 1.01).toFixed(1);
+                const targetPercent = task.target !== undefined ? task.target : 1.0;
+                const goalValue = (task.initial * (1 + targetPercent / 100)).toFixed(1);
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
                         <div class="flex items-center gap-2">
@@ -403,8 +525,12 @@
                             <div class="flex flex-col gap-1 overflow-hidden flex-1">
                                 <div contenteditable="true" onblur="updateTaskName(${taskIndex}, this.innerText)" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
                                 <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
-                                    <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" onblur="updateTaskInit(${taskIndex}, this.innerText)" class="text-slate-300 outline-none">${task.initial}</span></span>
-                                    <span class="bg-black/30 px-1 rounded-sm">Goal: <span class="text-v-radiant">${goalValue}</span></span>
+                                    <span class="bg-black/30 px-1 rounded-sm cursor-pointer hover:bg-black/50 transition-colors" onclick="openCalcModal(${taskIndex})">
+                                        Init: <span class="text-slate-300 outline-none">${task.initial}</span>
+                                    </span>
+                                    <span class="bg-black/30 px-1 rounded-sm cursor-pointer hover:bg-black/50 transition-colors" onclick="openGoalModal(${taskIndex})">
+                                        Goal: <span class="text-v-radiant">${goalValue} (${targetPercent}%)</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
