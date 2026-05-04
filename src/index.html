@@ -88,12 +88,17 @@
         }
 
         .w-stat.collapsed {
-            width: 0 !important;
-            min-width: 0 !important;
+            width: 4px !important;
+            min-width: 4px !important;
             padding: 0 !important;
-            border-right: 1px solid #df3e7b;
+            border-right: 2px solid #df3e7b;
+            cursor: pointer;
             overflow: hidden;
             font-size: 0;
+            background-color: rgba(223, 62, 123, 0.4);
+        }
+        .w-stat.collapsed:hover {
+            background-color: rgba(223, 62, 123, 0.8);
         }
 
         .w-stat.collapsed * { display: none; }
