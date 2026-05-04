@@ -204,6 +204,15 @@
             return [4]; // fallback
         }
 
+        function validatePercent(el) {
+            let text = el.innerText.replace('%', '').trim();
+            let val = parseFloat(text);
+            if (isNaN(val)) val = 0;
+            if (val < 0) val = 0;
+            if (val > 100) val = 100;
+            el.innerText = (val % 1 === 0 ? val : val.toFixed(1)) + '%';
+        }
+
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
             render();
@@ -266,7 +275,9 @@
                         <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
                     </th>`;
                 }
-                headerHtml += `<th onclick="toggleRanks()" class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
+                headerHtml += `<th class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 ${ranksCollapsed ? 'collapsed' : ''}" onclick="if(event.target === this) toggleRanks()">
+                    <div contenteditable="true" onblur="validatePercent(this)" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none">1%</div>
+                </th>`;
             });
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
@@ -289,7 +300,7 @@
                         bodyHtml += `<td class="cell w-day !p-0 overflow-hidden"><div class="flex items-center justify-center h-full px-2"><div contenteditable="true" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden"></div></div></td>`;
                     }
                     bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} ${ranksCollapsed ? 'collapsed' : ''}">
-                        <span class="text-[10px] font-bold">▲R</span>
+                        <div contenteditable="true" onblur="validatePercent(this)" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold">1%</div>
                     </td>`;
                 });
                 bodyHtml += `</tr>`;
