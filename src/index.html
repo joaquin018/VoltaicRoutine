@@ -262,7 +262,7 @@
             blockSizes.forEach(size => {
                 for (let i = 0; i < size; i++) {
                     headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase">
-                        DAY ${currentDay++}
+                        DAY<br>${currentDay++}
                         <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
                     </th>`;
                 }
