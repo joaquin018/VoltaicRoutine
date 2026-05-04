@@ -182,6 +182,9 @@
                 <tbody id="tasks-body"></tbody>
             </table>
         </div>
+        <div class="mt-4 flex gap-2">
+            <button onclick="addTask()" class="px-4 py-2 bg-v-surface border border-v-border text-slate-300 hover:text-white hover:border-[#6366f1] rounded-md text-xs font-bold uppercase transition-colors">+ Añadir Tarea</button>
+        </div>
     </div>
 
     <script>
@@ -189,12 +192,69 @@
         let currentDate = new Date();
         let ranksCollapsed = false;
 
-        const tasks = [
-            { name: "VT FLOATSHOT VALORANT HARD", color: "v-radiant", initial: 1250 },
-            { name: "VT ANGLESHOT VALORANT HARD", color: "v-elysian", initial: 1300 },
-            { name: "VT DOTTS VALORANT HARD", color: "v-aurora", initial: 3200 },
-            { name: "VT FOURSHOT ADAPTIVE VALORANT", color: "v-angelic", initial: 1575 }
-        ];
+        let tasks = [];
+        const taskColors = ["v-radiant", "v-elysian", "v-aurora", "v-angelic", "v-energy"];
+
+        // Setup Tauri API call
+        const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : async () => "[]";
+
+        async function loadData() {
+            try {
+                const json = await invoke('load_routine');
+                let parsed = JSON.parse(json);
+                if (Array.isArray(parsed)) {
+                    tasks = parsed;
+                }
+            } catch (e) {
+                console.error("Error loading data:", e);
+            }
+            render();
+        }
+
+        async function saveData() {
+            try {
+                await invoke('save_routine', { data: JSON.stringify(tasks) });
+            } catch (e) {
+                console.error("Error saving data:", e);
+            }
+        }
+
+        function addTask() {
+            const color = taskColors[tasks.length % taskColors.length];
+            tasks.push({
+                id: Date.now().toString(),
+                name: "NUEVA TAREA",
+                color: color,
+                initial: 0,
+                days: {},
+                stats: {} // For the 1% columns
+            });
+            saveData();
+            render();
+        }
+
+        function updateTaskName(index, name) {
+            tasks[index].name = name;
+            saveData();
+        }
+
+        function updateTaskInit(index, val) {
+            tasks[index].initial = parseFloat(val) || 0;
+            saveData();
+            render(); // Re-render to update the goal calculation
+        }
+
+        function updateDay(taskIndex, dayIndex, val) {
+            if (!tasks[taskIndex].days) tasks[taskIndex].days = {};
+            tasks[taskIndex].days[dayIndex] = val;
+            saveData();
+        }
+
+        function updateStat(taskIndex, statIndex, val) {
+            if (!tasks[taskIndex].stats) tasks[taskIndex].stats = {};
+            tasks[taskIndex].stats[statIndex] = val;
+            saveData();
+        }
 
         function getBlockSizes(days) {
             if (days === 28) return [4, 4, 4, 4, 4, 4, 4];
@@ -284,26 +344,30 @@
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
             let bodyHtml = '';
-            tasks.forEach(task => {
+            tasks.forEach((task, taskIndex) => {
                 const goalValue = (task.initial * 1.01).toFixed(1);
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
                         <div class="flex flex-col gap-1 overflow-hidden">
-                            <div contenteditable="true" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
+                            <div contenteditable="true" onblur="updateTaskName(${taskIndex}, this.innerText)" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
                             <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
-                                <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" class="text-slate-300 outline-none">${task.initial}</span></span>
-                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-radiant outline-none">${goalValue}</span></span>
+                                <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" onblur="updateTaskInit(${taskIndex}, this.innerText)" class="text-slate-300 outline-none">${task.initial}</span></span>
+                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span class="text-v-radiant">${goalValue}</span></span>
                             </div>
                         </div>
                     </td>`;
 
-                blockSizes.forEach((size, index) => {
+                let dayIndex = 1;
+                blockSizes.forEach((size, blockIndex) => {
                     for (let i = 0; i < size; i++) {
-                        bodyHtml += `<td class="cell w-day !p-0 overflow-hidden"><div class="flex items-center justify-center h-full px-2"><div contenteditable="true" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden"></div></div></td>`;
+                        const currentVal = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
+                        bodyHtml += `<td class="cell w-day !p-0 overflow-hidden"><div class="flex items-center justify-center h-full px-2"><div contenteditable="true" onblur="updateDay(${taskIndex}, ${dayIndex}, this.innerText)" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden">${currentVal}</div></div></td>`;
+                        dayIndex++;
                     }
-                    if (index < blockSizes.length - 1) {
+                    if (blockIndex < blockSizes.length - 1) {
+                        const currentStat = (task.stats && task.stats[blockIndex]) !== undefined ? task.stats[blockIndex] : '1%';
                         bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
-                            <div contenteditable="true" onblur="validatePercent(this)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold whitespace-nowrap">1%</div>
+                            <div contenteditable="true" onblur="validatePercent(this); updateStat(${taskIndex}, ${blockIndex}, this.innerText)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold whitespace-nowrap">${currentStat}</div>
                         </td>`;
                     }
                 });
@@ -312,7 +376,8 @@
             tbody.innerHTML = bodyHtml;
         }
 
-        render();
+        // Start the app
+        loadData();
     </script>
 </body>
 

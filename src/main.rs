@@ -113,6 +113,21 @@ fn upsert_entry(state: State<AppState>, habit_id: String, date: String, status: 
     Ok(())
 }
 
+#[tauri::command]
+fn save_routine(data: String) -> Result<(), String> {
+    std::fs::write("routine_data.json", data).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn load_routine() -> Result<String, String> {
+    std::fs::read_to_string("routine_data.json").unwrap_or_else(|_| "[]".to_string());
+    // Use read_to_string, if file doesn't exist return empty array
+    match std::fs::read_to_string("routine_data.json") {
+        Ok(data) => Ok(data),
+        Err(_) => Ok("[]".to_string()),
+    }
+}
+
 fn main() {
     let db_path = "habits.db";
     let conn = Connection::open(db_path).expect("failed to open database");
@@ -146,7 +161,7 @@ fn main() {
             db: Mutex::new(conn),
             node_id: Uuid::new_v4().to_string(),
         })
-        .invoke_handler(tauri::generate_handler![get_habits, upsert_habit, get_entries, upsert_entry, delete_habit])
+        .invoke_handler(tauri::generate_handler![get_habits, upsert_habit, get_entries, upsert_entry, delete_habit, save_routine, load_routine])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
