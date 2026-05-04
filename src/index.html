@@ -254,7 +254,7 @@
                     for (let day = 1; day <= 5; day++) {
                         const dayNum = (block * 5) + day;
                         if (dayNum > daysInMonth) break;
-                        bodyHtml += `<td class="cell w-day !p-0"><div contenteditable="true" class="outline-none w-full h-full flex items-center justify-center text-center"></div></td>`;
+                        bodyHtml += `<td class="cell w-day !p-0"><div contenteditable="true" class="outline-none w-full h-full text-center leading-[80px]"></div></td>`;
                     }
                     bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} ${ranksCollapsed ? 'collapsed' : ''}">
                         <span class="text-[10px] font-bold">▲R</span>
