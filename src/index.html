@@ -125,18 +125,34 @@
 
         let ranksCollapsed = false;
         let resizeObserver;
+        let isSyncing = false;
 
         function initResizeSync() {
             if (resizeObserver) resizeObserver.disconnect();
             resizeObserver = new ResizeObserver(entries => {
+                if (isSyncing) return;
+                isSyncing = true;
+                
                 for (let entry of entries) {
-                    const newWidth = entry.contentRect.width;
-                    if (newWidth > 0) {
+                    const newWidth = Math.round(entry.contentRect.width);
+                    const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--day-width'));
+                    
+                    if (Math.abs(newWidth - currentWidth) > 1) {
                         document.documentElement.style.setProperty('--day-width', `${newWidth}px`);
+                        
+                        // Clear inline widths from OTHER headers to let the CSS variable take over
+                        document.querySelectorAll('.w-day.resizable-header').forEach(header => {
+                            if (header !== entry.target) {
+                                header.style.width = '';
+                            }
+                        });
                     }
                 }
+                
+                // Allow next frame to sync
+                requestAnimationFrame(() => { isSyncing = false; });
             });
-            // Observe all day headers
+            
             document.querySelectorAll('.w-day.resizable-header').forEach(header => {
                 resizeObserver.observe(header);
             });
