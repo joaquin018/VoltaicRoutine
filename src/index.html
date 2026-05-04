@@ -24,7 +24,7 @@
                         'v-aurora': '#df3e7b',
                         'v-angelic': '#7ed3f2',
                         'v-energy': '#d97706',
-                        'v-border': 'rgba(255, 255, 255, 0.05)',
+                        'v-border': '#ffffff0d',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -34,49 +34,81 @@
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @layer components {
-            :root {
-                --day-width: 60px;
-                --scenario-width: 260px;
-                --v-rank-red: #df3e7b; /* Using Aurora for the red accents */
-            }
-            .cell {
-                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px] relative transition-colors;
-            }
-            .w-scenario {
-                width: var(--scenario-width);
-                min-width: var(--scenario-width);
-                max-width: var(--scenario-width);
-                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r border-white/10 overflow-hidden;
-            }
-            .w-day { 
-                width: var(--day-width);
-                min-width: var(--day-width);
-                max-width: var(--day-width);
-                @apply font-mono text-[11px] text-slate-300 uppercase; 
-            }
-            .w-stat { 
-                @apply w-[45px] text-white font-black text-[12px] bg-v-aurora/20 transition-all duration-300; 
-                clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); /* Slanted look from image */
-            }
-            .w-stat.collapsed {
-                @apply w-0 min-w-0 px-0 border-r border-v-aurora overflow-hidden p-0;
-                font-size: 0;
-            }
-            .w-stat.collapsed * { @apply hidden; }
-            
-            .play-icon {
-                @apply inline-block cursor-pointer w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-current transition-all duration-200;
-                filter: drop-shadow(0 0 4px currentColor);
-            }
-            .play-icon:hover { @apply scale-[1.4] translate-x-[1px]; }
-
-            /* Custom Resize Handle */
-            .resize-handle {
-                @apply absolute top-0 right-0 w-[4px] h-full cursor-col-resize hover:bg-v-radiant/50 transition-colors z-10;
-            }
+    <style>
+        :root {
+            --day-width: 60px;
+            --scenario-width: 260px;
+            --v-aurora: #df3e7b;
         }
+
+        .cell {
+            border-right: 1px solid #ffffff0d;
+            border-bottom: 1px solid #ffffff0d;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            white-space: nowrap;
+            height: 80px;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .w-scenario {
+            width: var(--scenario-width);
+            min-width: var(--scenario-width);
+            max-width: var(--scenario-width);
+            background-color: #141414;
+            font-weight: 700;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            text-align: left;
+            padding-left: 1rem;
+        }
+
+        .w-day {
+            width: var(--day-width);
+            min-width: var(--day-width);
+            max-width: var(--day-width);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .w-stat {
+            width: 45px;
+            color: white;
+            font-weight: 900;
+            font-size: 12px;
+            background-color: rgba(223, 62, 123, 0.2);
+            transition: all 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+        }
+
+        .w-stat.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            border-right: 1px solid #df3e7b;
+            overflow: hidden;
+            font-size: 0;
+        }
+
+        .w-stat.collapsed * { display: none; }
+
+        .resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            cursor: col-resize;
+            transition: background-color 0.2s;
+            z-index: 10;
+        }
+        .resize-handle:hover { background-color: rgba(194, 154, 74, 0.5); }
 
         ::-webkit-scrollbar { height: 10px; width: 10px; }
         ::-webkit-scrollbar-track { background: #05070a; }
