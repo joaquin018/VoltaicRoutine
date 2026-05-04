@@ -21,7 +21,7 @@
                         'v-header': '#1a1a1a',
                         'v-radiant': '#c29a4a',
                         'v-elysian': '#5b6ee1',
-                        'v-aurora': '#df3e7b',
+                        'v-aurora': '#6366f1', /* Indigo instead of loud pink */
                         'v-angelic': '#7ed3f2',
                         'v-energy': '#d97706',
                         'v-border': '#ffffff0d',
@@ -38,7 +38,7 @@
         :root {
             --day-width: 60px;
             --scenario-width: 260px;
-            --v-aurora: #df3e7b;
+            --v-aurora: #6366f1;
         }
 
         .cell {
@@ -82,7 +82,7 @@
             color: white;
             font-weight: 900;
             font-size: 12px;
-            background-color: rgba(223, 62, 123, 0.2);
+            background-color: rgba(99, 102, 241, 0.2);
             transition: all 0.3s;
         }
 
@@ -90,7 +90,7 @@
             width: 1px !important;
             min-width: 1px !important;
             padding: 0 !important;
-            border-right: 1px solid #df3e7b;
+            border-right: 1px solid var(--v-aurora);
             cursor: pointer;
             overflow: visible;
             font-size: 0;
