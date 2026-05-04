@@ -215,7 +215,7 @@
                         <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
                     </th>`;
                 }
-                headerHtml += `<th onclick="toggleRanks()" class="cell w-stat border-v-border cursor-pointer hover:bg-red-800 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
+                headerHtml += `<th onclick="toggleRanks()" class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
             }
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
