@@ -98,10 +98,6 @@
                         </div>
                         <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
                     </th>
-                    <th
-                        class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Play
-                    </th>
                     <!-- JS will populate the rest -->
                 </tr>
             </thead>
@@ -200,8 +196,7 @@
                                 <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-rank-gold outline-none">${goalValue}</span></span>
                             </div>
                         </div>
-                    </th>
-                    <td class="cell w-[60px]"><div class="play-icon text-${task.color}"></div></td>`;
+                    </td>`;
 
                 for (let block = 0; block < totalBlocks; block++) {
                     for (let day = 1; day <= 5; day++) {
