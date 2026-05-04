@@ -33,17 +33,24 @@
     </script>
     <style type="text/tailwindcss">
         @layer components {
+            :root {
+                --day-width: 60px;
+            }
             .cell {
                 @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px];
             }
             .resizable-header {
                 resize: horizontal;
                 overflow: hidden;
+                min-width: 10px; /* Allow very small cells */
             }
             .w-scenario {
                 @apply w-[260px] text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700 resizable-header;
             }
-            .w-day { @apply w-[60px] font-mono text-[11px] text-white uppercase resizable-header; }
+            .w-day { 
+                width: var(--day-width);
+                @apply font-mono text-[11px] text-white uppercase resizable-header; 
+            }
             .w-stat { 
                 @apply w-[45px] text-white font-black text-[12px] bg-red-900/80 transition-all duration-300; 
             }
@@ -117,6 +124,23 @@
         }
 
         let ranksCollapsed = false;
+        let resizeObserver;
+
+        function initResizeSync() {
+            if (resizeObserver) resizeObserver.disconnect();
+            resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const newWidth = entry.contentRect.width;
+                    if (newWidth > 0) {
+                        document.documentElement.style.setProperty('--day-width', `${newWidth}px`);
+                    }
+                }
+            });
+            // Observe all day headers
+            document.querySelectorAll('.w-day.resizable-header').forEach(header => {
+                resizeObserver.observe(header);
+            });
+        }
 
         function toggleRanks() {
             ranksCollapsed = !ranksCollapsed;
@@ -183,6 +207,7 @@
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
+            initResizeSync();
         }
 
         render();
