@@ -167,7 +167,7 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             monthDisplay.innerText = `${months[month]} ${year}`;
 
-            while (headerRow.children.length > 2) headerRow.removeChild(headerRow.lastChild);
+            while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
 
             let headerHtml = '';
             const totalBlocks = Math.ceil(daysInMonth / 5);
