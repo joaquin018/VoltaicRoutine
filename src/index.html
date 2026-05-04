@@ -35,21 +35,19 @@
         @layer components {
             :root {
                 --day-width: 60px;
+                --scenario-width: 260px;
             }
             .cell {
-                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px];
-            }
-            .resizable-header {
-                resize: horizontal;
-                overflow: hidden;
-                min-width: 10px; /* Allow very small cells */
+                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px] relative;
             }
             .w-scenario {
-                @apply w-[260px] text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700 resizable-header;
+                width: var(--scenario-width);
+                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700;
             }
             .w-day { 
                 width: var(--day-width);
-                @apply font-mono text-[11px] text-white uppercase resizable-header; 
+                min-width: var(--day-width);
+                @apply font-mono text-[11px] text-white uppercase; 
             }
             .w-stat { 
                 @apply w-[45px] text-white font-black text-[12px] bg-red-900/80 transition-all duration-300; 
@@ -58,58 +56,53 @@
                 @apply w-0 min-w-0 px-0 border-r border-v-rank-red overflow-hidden p-0;
                 font-size: 0;
             }
-            .w-stat.collapsed * {
-                @apply hidden;
-            }
-            .w-goal, .w-initial { @apply w-[80px] bg-black text-slate-400 font-mono text-[10px]; }
+            .w-stat.collapsed * { @apply hidden; }
             
             .play-icon {
                 @apply inline-block cursor-pointer w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-current transition-all duration-200;
                 filter: drop-shadow(0 0 4px currentColor);
             }
-            .play-icon:hover {
-                @apply scale-[1.4] translate-x-[1px];
+            .play-icon:hover { @apply scale-[1.4] translate-x-[1px]; }
+
+            /* Custom Resize Handle */
+            .resize-handle {
+                @apply absolute top-0 right-0 w-[4px] h-full cursor-col-resize hover:bg-v-rank-gold/50 transition-colors z-10;
             }
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { height: 10px; width: 10px; }
         ::-webkit-scrollbar-track { background: #05070a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border: 2px solid #05070a; border-radius: 5px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        /* Resize Handle Styling */
-        .resizable-header::-webkit-resizer {
-            background-color: var(--v-rank-gold);
-            border-radius: 5px;
-        }
-
     </style>
 </head>
-<body class="bg-v-main text-slate-100 font-sans text-[12px] antialiased">
+<body class="bg-v-main text-slate-100 font-sans text-[12px] antialiased select-none">
     <div class="p-5 min-w-[4000px]">
         <table class="w-full border-separate border-spacing-0 border-t border-l border-v-border">
             <thead class="sticky top-0 z-10">
                 <tr id="header-row-1">
-                    <th class="cell text-left pl-4 text-base font-bold text-white bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest resizable-header">
+                    <th class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest">
                         <div class="flex items-center gap-4 bg-black/40 px-4 py-1 rounded-sm text-sm border border-white/10 w-fit">
                             <button onclick="changeMonth(-1)" class="hover:text-v-rank-gold transition-colors text-lg">&lt;</button>
                             <span id="month-display" class="min-w-[120px] text-center text-v-rank-gold">Marzo</span>
                             <button onclick="changeMonth(1)" class="hover:text-v-rank-gold transition-colors text-lg">&gt;</button>
                         </div>
+                        <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
                     </th>
-                    <th class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest resizable-header">Play</th>
+                    <th class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        Play
+                    </th>
                     <!-- JS will populate the rest -->
                 </tr>
             </thead>
-            <tbody id="tasks-body">
-                <!-- JS will populate rows -->
-            </tbody>
+            <tbody id="tasks-body"></tbody>
         </table>
     </div>
 
     <script>
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         let currentDate = new Date();
+        let ranksCollapsed = false;
         
         const tasks = [
             { name: "1. VT FLOATSHOT VALORANT HARD", color: "v-rank-gold", initial: 1250 },
@@ -123,46 +116,39 @@
             render();
         }
 
-        let ranksCollapsed = false;
-        let resizeObserver;
-        let isSyncing = false;
-
-        function initResizeSync() {
-            if (resizeObserver) resizeObserver.disconnect();
-            resizeObserver = new ResizeObserver(entries => {
-                if (isSyncing) return;
-                isSyncing = true;
-                
-                for (let entry of entries) {
-                    const newWidth = Math.round(entry.contentRect.width);
-                    const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--day-width'));
-                    
-                    if (Math.abs(newWidth - currentWidth) > 1) {
-                        document.documentElement.style.setProperty('--day-width', `${newWidth}px`);
-                        
-                        // Clear inline widths from OTHER headers to let the CSS variable take over
-                        document.querySelectorAll('.w-day.resizable-header').forEach(header => {
-                            if (header !== entry.target) {
-                                header.style.width = '';
-                            }
-                        });
-                    }
-                }
-                
-                // Allow next frame to sync
-                requestAnimationFrame(() => { isSyncing = false; });
-            });
-            
-            document.querySelectorAll('.w-day.resizable-header').forEach(header => {
-                resizeObserver.observe(header);
-            });
-        }
-
         function toggleRanks() {
             ranksCollapsed = !ranksCollapsed;
-            document.querySelectorAll('.w-stat').forEach(el => {
-                el.classList.toggle('collapsed', ranksCollapsed);
-            });
+            render(); // Re-render to apply classes
+        }
+
+        // Custom Resize Logic
+        let isResizing = false;
+        let resizeType = '';
+        let startX, startWidth;
+
+        function startResize(e, type) {
+            isResizing = true;
+            resizeType = type;
+            startX = e.pageX;
+            startWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue(type === 'day' ? '--day-width' : '--scenario-width'));
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', stopResize);
+            document.body.classList.add('cursor-col-resize');
+        }
+
+        function handleMouseMove(e) {
+            if (!isResizing) return;
+            const delta = e.pageX - startX;
+            const newWidth = Math.max(10, startWidth + delta);
+            document.documentElement.style.setProperty(resizeType === 'day' ? '--day-width' : '--scenario-width', `${newWidth}px`);
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', stopResize);
+            document.body.classList.remove('cursor-col-resize');
         }
 
         function render() {
@@ -173,28 +159,25 @@
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
             monthDisplay.innerText = `${months[month]} ${year}`;
 
-            // 1. Reset Headers (keep first two)
-            while (headerRow.children.length > 2) {
-                headerRow.removeChild(headerRow.lastChild);
-            }
+            while (headerRow.children.length > 2) headerRow.removeChild(headerRow.lastChild);
 
-            // 2. Generate Headers
             let headerHtml = '';
             const totalBlocks = Math.ceil(daysInMonth / 5);
             for (let block = 0; block < totalBlocks; block++) {
                 for (let day = 1; day <= 5; day++) {
                     const dayNum = (block * 5) + day;
                     if (dayNum > daysInMonth) break;
-                    headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase resizable-header">DAY ${dayNum}</th>`;
+                    headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase">
+                        DAY ${dayNum}
+                        <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
+                    </th>`;
                 }
                 headerHtml += `<th onclick="toggleRanks()" class="cell w-stat border-v-border cursor-pointer hover:bg-red-800 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
             }
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
-            // 3. Generate Rows
             let bodyHtml = '';
             tasks.forEach(task => {
                 const goalValue = (task.initial * 1.01).toFixed(1);
@@ -207,23 +190,20 @@
                                 <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-rank-gold outline-none">${goalValue}</span></span>
                             </div>
                         </div>
-                    </td>
+                    </th>
                     <td class="cell w-[60px]"><div class="play-icon text-${task.color}"></div></td>`;
                 
                 for (let block = 0; block < totalBlocks; block++) {
                     for (let day = 1; day <= 5; day++) {
                         const dayNum = (block * 5) + day;
                         if (dayNum > daysInMonth) break;
-                        bodyHtml += `<td class="cell w-day">
-                            <div contenteditable="true" class="outline-none focus:bg-white/10 w-full h-full flex items-center justify-center"></div>
-                        </td>`;
+                        bodyHtml += `<td class="cell w-day"><div contenteditable="true" class="outline-none focus:bg-white/10 w-full h-full flex items-center justify-center"></div></td>`;
                     }
                     bodyHtml += `<td class="cell w-stat ${ranksCollapsed ? 'collapsed' : ''}"><span class="text-[8px] mr-0.5">▲</span>R</td>`;
                 }
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
-            initResizeSync();
         }
 
         render();
