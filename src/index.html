@@ -544,17 +544,12 @@
                 let currentGoal = parseFloat(goalValue);
                 
                 blockSizes.forEach((size, blockIndex) => {
-                    let blockSum = 0;
-                    let blockCount = 0;
-
                     for (let i = 0; i < size; i++) {
                         const currentValStr = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
                         const currentVal = parseFloat(currentValStr);
                         let cellClass = "";
                         
                         if (!isNaN(currentVal) && currentValStr !== '') {
-                            blockSum += currentVal;
-                            blockCount++;
                             if (currentVal >= currentGoal) {
                                 cellClass = "bg-v-angelic/20";
                             } else {
@@ -571,13 +566,11 @@
                     }
 
                     if (blockIndex < blockSizes.length - 1) {
-                        const blockAvg = blockCount > 0 ? (blockSum / blockCount) : 0;
                         const blockTargetStr = (task.stats && task.stats[blockIndex]) !== undefined ? task.stats[blockIndex] : targetPercent.toString();
                         const blockTarget = parseFloat(blockTargetStr.replace('%', '')) || 0;
 
-                        if (blockAvg > 0) {
-                            currentGoal = parseFloat((blockAvg * (1 + blockTarget / 100)).toFixed(1));
-                        }
+                        // Next goal is previous goal + percentage
+                        currentGoal = parseFloat((currentGoal * (1 + blockTarget / 100)).toFixed(1));
                         
                         bodyHtml += `<td class="cell w-stat !bg-[#6366f120] !text-[#6366f1] overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
                             <div class="flex flex-col items-center justify-center h-full gap-1">
