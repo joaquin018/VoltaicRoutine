@@ -48,7 +48,8 @@
                 @apply w-[45px] text-white font-black text-[12px] bg-red-900/80 transition-all duration-300; 
             }
             .w-stat.collapsed {
-                @apply w-0 px-0 border-r-0 overflow-hidden opacity-0;
+                @apply w-[2px] min-w-[2px] px-0 border-r-0 overflow-hidden bg-v-rank-red p-0;
+                font-size: 0;
             }
             .w-goal, .w-initial { @apply w-[80px] bg-black text-slate-400 font-mono text-[10px]; }
             
