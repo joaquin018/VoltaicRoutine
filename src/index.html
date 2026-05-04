@@ -61,7 +61,7 @@
                 clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); /* Slanted look from image */
             }
             .w-stat.collapsed {
-                @apply w-0 min-w-0 px-0 border-r border-v-rank-red overflow-hidden p-0;
+                @apply w-0 min-w-0 px-0 border-r border-v-aurora overflow-hidden p-0;
                 font-size: 0;
             }
             .w-stat.collapsed * { @apply hidden; }
@@ -91,13 +91,13 @@
             <thead class="sticky top-0 z-10">
                 <tr id="header-row-1">
                     <th
-                        class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest !text-left pl-4">
+                        class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-aurora h-14 uppercase tracking-widest !text-left pl-4">
                         <div class="flex items-center justify-between text-sm w-[150px]">
                             <button onclick="changeMonth(-1)"
-                                class="hover:text-v-rank-gold transition-colors text-lg">&lt;</button>
-                            <span id="month-display" class="text-center text-v-rank-gold flex-1">Marzo</span>
+                                class="hover:text-v-radiant transition-colors text-lg">&lt;</button>
+                            <span id="month-display" class="text-center text-v-radiant flex-1">Marzo</span>
                             <button onclick="changeMonth(1)"
-                                class="hover:text-v-rank-gold transition-colors text-lg">&gt;</button>
+                                class="hover:text-v-radiant transition-colors text-lg">&gt;</button>
                         </div>
                         <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
                     </th>
@@ -193,10 +193,10 @@
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
                         <div class="flex flex-col gap-1 overflow-hidden">
-                            <div contenteditable="true" class="outline-none focus:text-v-rank-gold transition-colors truncate">${task.name}</div>
+                            <div contenteditable="true" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
                             <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
                                 <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" class="text-slate-300 outline-none">${task.initial}</span></span>
-                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-rank-gold outline-none">${goalValue}</span></span>
+                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-radiant outline-none">${goalValue}</span></span>
                             </div>
                         </div>
                     </td>`;
