@@ -217,9 +217,9 @@
             <p class="text-slate-400 text-[10px] mb-6 text-center uppercase">Ingresa 3 puntuaciones para calcular el promedio</p>
             
             <div class="flex justify-between gap-4 mb-8">
-                <input type="number" id="calc-v1" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
-                <input type="number" id="calc-v2" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
-                <input type="number" id="calc-v3" min="0" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+                <input type="number" id="calc-v1" min="0" onwheel="event.preventDefault()" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+                <input type="number" id="calc-v2" min="0" onwheel="event.preventDefault()" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
+                <input type="number" id="calc-v3" min="0" onwheel="event.preventDefault()" onkeydown="if(event.key==='-')event.preventDefault()" placeholder="0" class="w-20 h-20 bg-black/40 border border-v-border rounded-xl text-center text-xl text-white outline-none focus:border-v-radiant transition-colors">
             </div>
 
             <div class="bg-v-radiant/10 border border-v-radiant/20 p-4 rounded-lg mb-8 text-center">
@@ -243,7 +243,7 @@
             
             <div class="bg-black/40 border border-v-border rounded-xl p-8 mb-8 text-center">
                 <div class="flex items-center justify-center gap-2">
-                    <input type="number" id="goal-input" min="0" onkeydown="if(event.key==='-')event.preventDefault()" step="0.1" placeholder="1.0" class="w-24 bg-transparent text-center text-4xl text-white font-bold outline-none">
+                    <input type="number" id="goal-input" min="0" onwheel="event.preventDefault()" onkeydown="if(event.key==='-')event.preventDefault()" step="0.1" placeholder="1.0" class="w-24 bg-transparent text-center text-4xl text-white font-bold outline-none">
                     <span class="text-4xl text-v-radiant font-bold">%</span>
                 </div>
             </div>
