@@ -1,315 +1,187 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caleabits | Atelier Compact</title>
+    <title>Voltaic Valorant Benchmarks S1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;500&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0c0c0c;
-            --surface-color: #111111;
-            --accent-gold: #c5a059;
-            --text-primary: #fdfcfb;
-            --text-secondary: #777777;
-            --border-color: rgba(255, 255, 255, 0.06);
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'v-main': '#05070a',
+                        'v-surface': '#0f172a',
+                        'v-header': '#1e293b',
+                        'v-rank-red': '#e11d48',
+                        'v-rank-gold': '#eab308',
+                        'v-rank-blue': '#3b82f6',
+                        'v-rank-green': '#22c55e',
+                        'v-rank-purple': '#a855f7',
+                        'v-border': 'rgba(255, 255, 255, 0.08)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .cell {
+                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px];
+            }
+            .resizable-header {
+                resize: horizontal;
+                overflow: hidden;
+            }
+            .w-scenario {
+                @apply w-[260px] text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700 resizable-header;
+            }
+            .w-day { @apply w-[60px] font-mono text-[11px] text-white uppercase resizable-header; }
+            .w-stat { 
+                @apply w-[45px] text-white font-black text-[12px] bg-red-900/80 transition-all duration-300; 
+            }
+            .w-stat.collapsed {
+                @apply w-0 px-0 border-r-0 overflow-hidden opacity-0;
+            }
+            .w-goal, .w-initial { @apply w-[80px] bg-black text-slate-400 font-mono text-[10px]; }
+            
+            .play-icon {
+                @apply inline-block cursor-pointer w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[12px] border-l-current transition-all duration-200;
+                filter: drop-shadow(0 0 4px currentColor);
+            }
+            .play-icon:hover {
+                @apply scale-[1.4] translate-x-[1px];
+            }
         }
 
-        body { 
-            background: radial-gradient(circle at 50% -20%, #1a1a1a 0%, #050505 80%);
-            background-attachment: fixed;
-            color: var(--text-primary); 
-            font-family: 'Montserrat', sans-serif; 
-            user-select: none;
-            overflow-x: hidden;
-            letter-spacing: 0.01em;
-            min-height: 100vh;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { height: 10px; width: 10px; }
+        ::-webkit-scrollbar-track { background: #05070a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border: 2px solid #05070a; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        /* Resize Handle Styling */
+        .resizable-header::-webkit-resizer {
+            background-color: var(--v-rank-gold);
+            border-radius: 5px;
         }
 
-        h1, h2, .serif {
-            font-family: 'Playfair Display', serif;
-        }
-
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        [contenteditable="true"] {
-            user-select: text;
-            outline: none;
-        }
-
-        .habit-row {
-            transition: background 0.3s ease;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .habit-row:hover {
-            background: rgba(197, 160, 89, 0.02);
-        }
-
-        .day-cell {
-            transition: all 0.2s ease;
-            position: relative;
-            border-left: 1px solid var(--border-color);
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            margin: auto;
-            transition: all 0.2s ease;
-        }
-
-        .status-1 { background: var(--accent-gold); transform: scale(1.1); }
-        .status-2 { background: #333; }
-        .status-0 { }
-
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
-        ::-webkit-scrollbar-thumb { background: #222; }
-
-        .progress-line {
-            height: 1px;
-            background: #1a1a1a;
-            width: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent-gold);
-            transition: width 0.6s ease;
-        }
-
-        #month-title {
-            font-size: 1.8rem;
-            font-weight: 400;
-            font-style: italic;
-            color: var(--accent-gold);
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .nav-link {
-            text-transform: uppercase;
-            font-size: 0.6rem;
-            letter-spacing: 0.2em;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .add-habit-trigger {
-            padding: 12px;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.7rem;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .add-habit-trigger:hover { color: var(--accent-gold); }
-
-        .delete-btn {
-            opacity: 0;
-            transition: opacity 0.2s;
-            color: #333;
-        }
-
-        .habit-row:hover .delete-btn { opacity: 0.6; }
-        .delete-btn:hover { color: #600; opacity: 1 !important; }
     </style>
 </head>
-<body class="p-4 md:p-6">
-    <div class="max-w-[1500px] mx-auto">
-        <header class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-6">
-                <span onclick="changeMonth(-1)" class="nav-link text-lg">&lt;</span>
-                <h2 id="month-title">Mayo</h2>
-                <span onclick="changeMonth(1)" class="nav-link text-lg">&gt;</span>
-            </div>
-            
-            <div class="flex gap-8 items-center">
-                <div class="flex items-center gap-2">
-                    <span class="text-[9px] uppercase tracking-widest text-zinc-600">Ratio</span>
-                    <span id="total-pct" class="mono text-sm text-zinc-400">0%</span>
-                </div>
-                <div onclick="addHabit()" class="text-[9px] uppercase tracking-widest text-zinc-500 cursor-pointer hover:text-white transition-colors border border-white/10 px-3 py-1 rounded-sm">
-                    + Añadir
-                </div>
-            </div>
-        </header>
-
-        <div class="overflow-x-auto">
-            <table id="habits-table" class="w-full border-collapse">
-                <thead>
-                    <tr id="header-row" class="text-zinc-600 text-[8px] font-medium uppercase tracking-[0.15em]">
-                        <!-- JS Injection -->
-                    </tr>
-                </thead>
-                <tbody id="habits-body">
-                    <!-- JS Injection -->
-                </tbody>
-            </table>
-        </div>
+<body class="bg-v-main text-slate-100 font-sans text-[12px] antialiased">
+    <div class="p-5 min-w-[4000px]">
+        <table class="w-full border-separate border-spacing-0 border-t border-l border-v-border">
+            <thead class="sticky top-0 z-10">
+                <tr id="header-row-1">
+                    <th class="cell text-left pl-4 text-base font-bold text-white bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest resizable-header">
+                        <div class="flex items-center gap-4 bg-black/40 px-4 py-1 rounded-sm text-sm border border-white/10 w-fit">
+                            <button onclick="changeMonth(-1)" class="hover:text-v-rank-gold transition-colors text-lg">&lt;</button>
+                            <span id="month-display" class="min-w-[120px] text-center text-v-rank-gold">Marzo</span>
+                            <button onclick="changeMonth(1)" class="hover:text-v-rank-gold transition-colors text-lg">&gt;</button>
+                        </div>
+                    </th>
+                    <th class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest resizable-header">Play</th>
+                    <!-- JS will populate the rest -->
+                </tr>
+            </thead>
+            <tbody id="tasks-body">
+                <!-- JS will populate rows -->
+            </tbody>
+        </table>
     </div>
 
     <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        const { invoke } = window.__TAURI__.core;
-        
-        let focusedDay = new Date();
-        let state = { habits: [], entries: {} };
         const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        let currentDate = new Date();
+        
+        const tasks = [
+            { name: "1. VT FLOATSHOT VALORANT HARD", color: "v-rank-gold", initial: 1250 },
+            { name: "2. VT ANGLESHOT VALORANT HARD", color: "v-rank-gold", initial: 1300 },
+            { name: "4. VT DOTTS VALORANT HARD", color: "v-rank-red", initial: 3200 },
+            { name: "6. VT FOURSHOT ADAPTIVE VALORANT", color: "v-rank-purple", initial: 1575 }
+        ];
 
-        async function init() {
-            await fetchData();
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
             render();
         }
 
-        async function fetchData() {
-            const habits = await invoke('get_habits');
-            state.habits = habits;
-            for (const habit of habits) {
-                const entries = await invoke('get_entries', { habitId: habit.id });
-                state.entries[habit.id] = entries;
-            }
+        let ranksCollapsed = false;
+
+        function toggleRanks() {
+            ranksCollapsed = !ranksCollapsed;
+            document.querySelectorAll('.w-stat').forEach(el => {
+                el.classList.toggle('collapsed', ranksCollapsed);
+            });
         }
 
         function render() {
-            const year = focusedDay.getFullYear();
-            const month = focusedDay.getMonth();
+            const headerRow = document.getElementById('header-row-1');
+            const tbody = document.getElementById('tasks-body');
+            const monthDisplay = document.getElementById('month-display');
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
             
-            document.getElementById('month-title').innerText = months[month];
-            
-            const headerRow = document.getElementById('header-row');
-            let headerHtml = `<th class="p-2 text-left w-[180px] font-normal italic serif text-xs">Registro</th>`;
-            for(let i=1; i<=daysInMonth; i++) {
-                const isToday = isCurrentMonth && today.getDate() === i;
-                headerHtml += `<th class="p-1 min-w-[28px] text-center relative mono text-[9px] ${isToday ? 'text-[#c5a059]' : ''}">${i}</th>`;
+            monthDisplay.innerText = `${months[month]} ${year}`;
+
+            // 1. Reset Headers (keep first two)
+            while (headerRow.children.length > 2) {
+                headerRow.removeChild(headerRow.lastChild);
             }
-            headerHtml += `<th class="p-2 min-w-[60px] text-right font-normal text-[8px] tracking-widest">OK</th>`;
-            headerRow.innerHTML = headerHtml;
 
-            const body = document.getElementById('habits-body');
-            body.innerHTML = '';
+            // 2. Generate Headers
+            let headerHtml = '';
+            const totalBlocks = Math.ceil(daysInMonth / 5);
+            for (let block = 0; block < totalBlocks; block++) {
+                for (let day = 1; day <= 5; day++) {
+                    const dayNum = (block * 5) + day;
+                    if (dayNum > daysInMonth) break;
+                    headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase resizable-header">DAY ${dayNum}</th>`;
+                }
+                headerHtml += `<th onclick="toggleRanks()" class="cell w-stat border-v-border cursor-pointer hover:bg-red-800 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
+            }
+            headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
-            let totalSuccess = 0;
-            let totalPossible = 0;
-
-            state.habits.forEach(habit => {
-                const entries = state.entries[habit.id] || [];
-                const row = document.createElement('tr');
-                row.className = 'habit-row';
-                
-                let success=0, failure=0;
-                
-                let cellsHtml = `
-                    <td class="p-2">
-                        <div class="flex items-center gap-2">
-                            <button onclick="deleteHabit('${habit.id}')" class="delete-btn">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                            <div class="flex flex-col">
-                                <span contenteditable="true" 
-                                      onblur="updateHabitName('${habit.id}', this.innerText)" 
-                                      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" 
-                                      class="text-xs font-light outline-none focus:text-[#c5a059] cursor-text">
-                                    ${habit.name}
-                                </span>
+            // 3. Generate Rows
+            let bodyHtml = '';
+            tasks.forEach(task => {
+                const goalValue = (task.initial * 1.01).toFixed(1);
+                bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
+                    <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
+                        <div class="flex flex-col gap-1">
+                            <div contenteditable="true" class="outline-none focus:text-v-rank-gold transition-colors">${task.name}</div>
+                            <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
+                                <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" class="text-slate-300 outline-none">${task.initial}</span></span>
+                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-rank-gold outline-none">${goalValue}</span></span>
                             </div>
                         </div>
-                    </td>`;
-                
-                for(let i=1; i<=daysInMonth; i++) {
-                    const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${i.toString().padStart(2,'0')}`;
-                    const entry = entries.find(e => e.date === dateStr);
-                    const status = entry?.status || 0;
-                    
-                    let statusClass = 'status-0';
-                    if(status === 1) { statusClass = 'status-1'; success++; }
-                    else if(status === 2) { statusClass = 'status-2'; failure++; }
-                    
-                    cellsHtml += `
-                        <td onclick="toggleStatus('${habit.id}', '${dateStr}', ${status})" class="day-cell p-0 cursor-pointer">
-                            <div class="status-dot ${statusClass}"></div>
-                        </td>`;
-                }
-                
-                const pct = (success+failure) === 0 ? 0 : Math.round((success/(success+failure))*100);
-                totalSuccess += success;
-                totalPossible += (success + failure);
-                
-                cellsHtml += `
-                    <td class="p-2 text-right">
-                        <div class="flex items-center justify-end gap-2">
-                            <span class="mono text-[8px] text-zinc-500">${pct}%</span>
-                            <div class="progress-line"><div class="progress-fill" style="width: ${pct}%"></div></div>
-                        </div>
                     </td>
-                `;
+                    <td class="cell w-[60px]"><div class="play-icon text-${task.color}"></div></td>`;
                 
-                row.innerHTML = cellsHtml;
-                body.appendChild(row);
+                for (let block = 0; block < totalBlocks; block++) {
+                    for (let day = 1; day <= 5; day++) {
+                        const dayNum = (block * 5) + day;
+                        if (dayNum > daysInMonth) break;
+                        bodyHtml += `<td class="cell w-day">
+                            <div contenteditable="true" class="outline-none focus:bg-white/10 w-full h-full flex items-center justify-center"></div>
+                        </td>`;
+                    }
+                    bodyHtml += `<td class="cell w-stat ${ranksCollapsed ? 'collapsed' : ''}"><span class="text-[8px] mr-0.5">▲</span>R</td>`;
+                }
+                bodyHtml += `</tr>`;
             });
-
-            const totalPct = totalPossible === 0 ? 0 : Math.round((totalSuccess / totalPossible) * 100);
-            document.getElementById('total-pct').innerText = `${totalPct}%`;
+            tbody.innerHTML = bodyHtml;
         }
 
-        async function toggleStatus(habitId, date, currentStatus) {
-            const nextStatus = currentStatus === 1 ? 2 : (currentStatus === 2 ? 0 : 1);
-            const habitEntries = state.entries[habitId] || [];
-            const entryIndex = habitEntries.findIndex(e => e.date === date);
-            if (entryIndex > -1) habitEntries[entryIndex].status = nextStatus;
-            else habitEntries.push({ habit_id: habitId, date: date, status: nextStatus });
-            state.entries[habitId] = habitEntries;
-            render(); 
-            try { await invoke('upsert_entry', { habitId, date, status: nextStatus }); } catch (err) { await fetchData(); render(); }
-        }
-
-        async function addHabit() {
-            const newId = crypto.randomUUID();
-            const newHabit = { id: newId, name: 'Nuevo Registro' };
-            state.habits.push(newHabit);
-            state.entries[newId] = [];
-            render();
-            try { await invoke('upsert_habit', { id: newId, name: newHabit.name }); } catch (err) { state.habits = state.habits.filter(h => h.id !== newId); render(); }
-        }
-
-        async function updateHabitName(id, newName) {
-            if(!newName.trim()) return;
-            const habit = state.habits.find(h => h.id === id);
-            if (habit) habit.name = newName;
-            await invoke('upsert_habit', { id, name: newName });
-        }
-
-        async function deleteHabit(id) {
-            if(!confirm('¿Eliminar?')) return;
-            const originalHabits = [...state.habits];
-            state.habits = state.habits.filter(h => h.id !== id);
-            render();
-            try { await invoke('delete_habit', { id }); } catch (err) { state.habits = originalHabits; render(); }
-        }
-
-        function changeMonth(offset) {
-            focusedDay.setMonth(focusedDay.getMonth() + offset);
-            init();
-        }
-
-        window.onload = () => {
-            init();
-            document.body.style.opacity = 1;
-        };
+        render();
     </script>
 </body>
 </html>
