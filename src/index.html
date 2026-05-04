@@ -135,11 +135,12 @@
 
 <body class="bg-v-main text-slate-100 font-sans text-[12px] antialiased select-none">
     <div class="p-5 inline-block min-w-full">
-        <table class="table-fixed border-separate border-spacing-0 border-t border-l border-v-border">
-            <thead class="sticky top-0 z-10">
-                <tr id="header-row-1">
-                    <th
-                        class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-aurora h-14 uppercase tracking-widest !text-left pl-4">
+        <div class="rounded-xl border border-v-border overflow-hidden">
+            <table class="table-fixed border-separate border-spacing-0">
+                <thead class="sticky top-0 z-10">
+                    <tr id="header-row-1">
+                        <th
+                            class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-aurora h-14 uppercase tracking-widest !text-left pl-4 rounded-tl-xl">
                         <div class="flex items-center justify-between text-sm w-[150px]">
                             <button onclick="changeMonth(-1)"
                                 class="hover:text-v-radiant transition-colors text-lg">&lt;</button>
@@ -153,7 +154,8 @@
                 </tr>
             </thead>
             <tbody id="tasks-body"></tbody>
-        </table>
+            </table>
+        </div>
     </div>
 
     <script>
