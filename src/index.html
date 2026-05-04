@@ -11,6 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -187,6 +188,18 @@
         </div>
     </div>
 
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] opacity-0 pointer-events-none transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-v-surface border border-v-border p-6 rounded-xl max-w-sm w-full shadow-2xl scale-95 opacity-0 transition-all duration-300" id="modal-content">
+            <h3 class="text-v-radiant font-bold text-lg mb-2 uppercase tracking-wider">Confirmar Acción</h3>
+            <p class="text-slate-300 text-sm mb-6" id="modal-message">¿Estás seguro de que deseas eliminar esta tarea?</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel" class="px-4 py-2 text-slate-400 hover:text-white text-xs font-bold uppercase transition-colors">Cancelar</button>
+                <button id="modal-confirm" class="px-4 py-2 bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/40 rounded-lg text-xs font-bold uppercase transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const months = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sept.", "oct.", "nov.", "dic."];
         let currentDate = new Date();
@@ -254,6 +267,41 @@
             if (!tasks[taskIndex].stats) tasks[taskIndex].stats = {};
             tasks[taskIndex].stats[statIndex] = val;
             saveData();
+        }
+
+        function deleteTask(index) {
+            showConfirmModal('¿Estás seguro de que deseas eliminar esta tarea?', () => {
+                tasks.splice(index, 1);
+                saveData();
+                render();
+            });
+        }
+
+        function showConfirmModal(message, onConfirm) {
+            const modal = document.getElementById('confirm-modal');
+            const messageEl = document.getElementById('modal-message');
+            const confirmBtn = document.getElementById('modal-confirm');
+            const cancelBtn = document.getElementById('modal-cancel');
+            const content = document.getElementById('modal-content');
+
+            messageEl.innerText = message;
+            
+            // Show
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95', 'opacity-0');
+
+            const close = () => {
+                content.classList.add('scale-95', 'opacity-0');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            };
+
+            confirmBtn.onclick = () => {
+                onConfirm();
+                close();
+            };
+
+            cancelBtn.onclick = close;
+            modal.onclick = (e) => { if (e.target === modal) close(); };
         }
 
         function getBlockSizes(days) {
@@ -348,11 +396,16 @@
                 const goalValue = (task.initial * 1.01).toFixed(1);
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
-                        <div class="flex flex-col gap-1 overflow-hidden">
-                            <div contenteditable="true" onblur="updateTaskName(${taskIndex}, this.innerText)" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
-                            <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
-                                <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" onblur="updateTaskInit(${taskIndex}, this.innerText)" class="text-slate-300 outline-none">${task.initial}</span></span>
-                                <span class="bg-black/30 px-1 rounded-sm">Goal: <span class="text-v-radiant">${goalValue}</span></span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="deleteTask(${taskIndex})" class="text-red-500 opacity-30 hover:opacity-100 transition-all p-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <div class="flex flex-col gap-1 overflow-hidden flex-1">
+                                <div contenteditable="true" onblur="updateTaskName(${taskIndex}, this.innerText)" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
+                                <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
+                                    <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" onblur="updateTaskInit(${taskIndex}, this.innerText)" class="text-slate-300 outline-none">${task.initial}</span></span>
+                                    <span class="bg-black/30 px-1 rounded-sm">Goal: <span class="text-v-radiant">${goalValue}</span></span>
+                                </div>
                             </div>
                         </div>
                     </td>`;
@@ -374,6 +427,7 @@
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
+            lucide.createIcons();
         }
 
         // Start the app
