@@ -308,9 +308,9 @@
         }
 
         function updateTaskInit(index, val) {
-            tasks[index].initial = parseFloat(val) || 0;
+            tasks[index].initial = Math.round(parseFloat(val)) || 0;
             saveData();
-            render(); // Re-render to update the goal calculation
+            render();
         }
 
         function updateDay(taskIndex, dayIndex, val) {
@@ -519,7 +519,7 @@
             let bodyHtml = '';
             tasks.forEach((task, taskIndex) => {
                 const targetPercent = task.target !== undefined ? task.target : 1.0;
-                const goalValue = (task.initial * (1 + targetPercent / 100)).toFixed(1);
+                const goalValue = Math.round(task.initial * (1 + targetPercent / 100));
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
                         <div class="flex items-center gap-2">
@@ -530,7 +530,7 @@
                                 <div contenteditable="true" onblur="updateTaskName(${taskIndex}, this.innerText)" class="outline-none focus:text-v-radiant transition-colors truncate">${task.name}</div>
                                 <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
                                     <span class="bg-black/30 px-1 rounded-sm cursor-pointer hover:bg-black/50 transition-colors" onclick="openCalcModal(${taskIndex})">
-                                        Init: <span class="text-slate-300 outline-none">${task.initial}</span>
+                                        Init: <span class="text-slate-300 outline-none">${Math.round(task.initial)}</span>
                                     </span>
                                     <span class="bg-black/30 px-1 rounded-sm cursor-pointer hover:bg-black/50 transition-colors" onclick="openGoalModal(${taskIndex})">
                                         Goal: <span class="text-v-radiant">${goalValue} (${targetPercent}%)</span>
@@ -541,7 +541,7 @@
                     </td>`;
 
                 let dayIndex = 1;
-                let currentGoal = parseFloat(goalValue);
+                let currentGoal = goalValue;
                 
                 blockSizes.forEach((size, blockIndex) => {
                     for (let i = 0; i < size; i++) {
@@ -570,7 +570,7 @@
                         const blockTarget = parseFloat(blockTargetStr.replace('%', '')) || 0;
 
                         // Next goal is previous goal + percentage
-                        currentGoal = parseFloat((currentGoal * (1 + blockTarget / 100)).toFixed(1));
+                        currentGoal = Math.round(currentGoal * (1 + blockTarget / 100));
                         
                         bodyHtml += `<td class="cell w-stat !bg-[#6366f120] !text-[#6366f1] overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
                             <div class="flex flex-col items-center justify-center h-full gap-1">
