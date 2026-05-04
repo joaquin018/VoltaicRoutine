@@ -301,9 +301,8 @@
                 name: "NUEVA TAREA",
                 color: color,
                 initial: 0,
-                target: 1.0, // Default 1%
-                days: {},
-                stats: {} // For the 1% columns
+                target: 1.0, 
+                months: {} // YYYY-MM -> { days: {}, stats: {} }
             });
             saveData();
             render();
@@ -321,23 +320,61 @@
         }
 
         function updateDay(taskIndex, dayIndex, val) {
-            if (!tasks[taskIndex].days) tasks[taskIndex].days = {};
-            tasks[taskIndex].days[dayIndex] = val;
+            const monthKey = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (!tasks[taskIndex].months) tasks[taskIndex].months = {};
+            if (!tasks[taskIndex].months[monthKey]) tasks[taskIndex].months[monthKey] = { days: {}, stats: {} };
+            tasks[taskIndex].months[monthKey].days[dayIndex] = val;
             saveData();
         }
 
         function updateStat(taskIndex, statIndex, val) {
-            if (!tasks[taskIndex].stats) tasks[taskIndex].stats = {};
-            tasks[taskIndex].stats[statIndex] = val.replace('%', '') + '%';
+            const monthKey = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+            const cleanVal = val.replace('%', '') + '%';
+            if (!tasks[taskIndex].months) tasks[taskIndex].months = {};
+            if (!tasks[taskIndex].months[monthKey]) tasks[taskIndex].months[monthKey] = { days: {}, stats: {} };
+            tasks[taskIndex].months[monthKey].stats[statIndex] = cleanVal;
             saveData();
         }
 
+        function getMonthBaseGoal(taskIndex, monthKey) {
+            const task = tasks[taskIndex];
+            const date = new Date(monthKey + "-01");
+            date.setMonth(date.getMonth() - 1);
+            const prevMonthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+
+            // If we have data for the previous month, chain it
+            if (task.months && task.months[prevMonthKey]) {
+                const prevMonth = task.months[prevMonthKey];
+                const prevMonthDays = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                const prevMonthBlocks = getBlockSizes(prevMonthDays);
+                const prevBaseGoal = getMonthBaseGoal(taskIndex, prevMonthKey);
+                
+                let runningGoal = prevBaseGoal;
+                const globalTarget = task.target !== undefined ? task.target : 1.0;
+
+                prevMonthBlocks.forEach((_, bIdx) => {
+                    if (bIdx < prevMonthBlocks.length - 1) {
+                        const bTargetStr = prevMonth.stats[bIdx] || globalTarget.toString();
+                        const bTarget = parseFloat(bTargetStr.replace('%', '')) || 0;
+                        runningGoal = Math.round(runningGoal * (1 + bTarget / 100));
+                    }
+                });
+                return runningGoal;
+            }
+
+            // Fallback to initial + global target for first block of history
+            const targetPercent = task.target !== undefined ? task.target : 1.0;
+            return Math.round(task.initial * (1 + targetPercent / 100));
+        }
+
         function applyBulkPercent(statIndex, val) {
+            const monthKey = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
             const cleanVal = val.replace('%', '') + '%';
             columnSettings[statIndex] = cleanVal;
             tasks.forEach(task => {
-                if (!task.stats) task.stats = {};
-                task.stats[statIndex] = cleanVal;
+                if (!task.months) task.months = {};
+                if (!task.months[monthKey]) task.months[monthKey] = { days: {}, stats: {} };
+                task.months[monthKey].stats[statIndex] = cleanVal;
             });
             saveData();
             render();
@@ -535,10 +572,14 @@
             });
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
+            const monthKey = `${year}-${(month + 1).toString().padStart(2, '0')}`;
+
             let bodyHtml = '';
             tasks.forEach((task, taskIndex) => {
                 const targetPercent = task.target !== undefined ? task.target : 1.0;
-                const goalValue = Math.round(task.initial * (1 + targetPercent / 100));
+                const monthBaseGoal = getMonthBaseGoal(taskIndex, monthKey);
+                const monthData = (task.months && task.months[monthKey]) ? task.months[monthKey] : { days: {}, stats: {} };
+
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
                         <div class="flex items-center gap-2">
@@ -552,7 +593,7 @@
                                         Init: <span class="text-slate-300 outline-none">${Math.round(task.initial)}</span>
                                     </span>
                                     <span class="bg-black/30 px-1 rounded-sm cursor-pointer hover:bg-black/50 transition-colors" onclick="openGoalModal(${taskIndex})">
-                                        Goal: <span class="text-v-radiant">${goalValue} (${targetPercent}%)</span>
+                                        Base: <span class="text-v-radiant">${monthBaseGoal}</span>
                                     </span>
                                 </div>
                             </div>
@@ -560,11 +601,11 @@
                     </td>`;
 
                 let dayIndex = 1;
-                let currentGoal = goalValue;
+                let currentGoal = monthBaseGoal;
                 
                 blockSizes.forEach((size, blockIndex) => {
                     for (let i = 0; i < size; i++) {
-                        const currentValStr = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
+                        const currentValStr = (monthData.days && monthData.days[dayIndex]) !== undefined ? monthData.days[dayIndex] : '';
                         const currentVal = parseFloat(currentValStr);
                         let cellClass = "";
                         
@@ -585,7 +626,7 @@
                     }
 
                     if (blockIndex < blockSizes.length - 1) {
-                        const blockTargetStr = (task.stats && task.stats[blockIndex]) !== undefined ? task.stats[blockIndex] : targetPercent.toString();
+                        const blockTargetStr = (monthData.stats && monthData.stats[blockIndex]) !== undefined ? monthData.stats[blockIndex] : targetPercent.toString();
                         const blockTarget = parseFloat(blockTargetStr.replace('%', '')) || 0;
 
                         // Next goal is previous goal + percentage
