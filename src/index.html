@@ -98,6 +98,7 @@
             clip-path: none !important;
             position: relative;
         }
+
         /* Hit area for clicking the 1px line */
         .w-stat.collapsed::after {
             content: '';
@@ -108,11 +109,14 @@
             height: 100%;
             z-index: 20;
         }
+
         .w-stat.collapsed:hover {
             border-right: 2px solid #ffffff;
         }
 
-        .w-stat.collapsed * { display: none; }
+        .w-stat.collapsed * {
+            display: none;
+        }
 
         .resize-handle {
             position: absolute;
@@ -124,12 +128,29 @@
             transition: background-color 0.2s;
             z-index: 10;
         }
-        .resize-handle:hover { background-color: rgba(194, 154, 74, 0.5); }
 
-        ::-webkit-scrollbar { height: 10px; width: 10px; }
-        ::-webkit-scrollbar-track { background: #05070a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border: 2px solid #05070a; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .resize-handle:hover {
+            background-color: rgba(194, 154, 74, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #05070a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border: 2px solid #05070a;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
 
         ::selection {
             background-color: rgba(99, 102, 241, 0.4);
@@ -146,19 +167,19 @@
                     <tr id="header-row-1">
                         <th
                             class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-[#6366f1] h-14 uppercase tracking-widest !text-left pl-4 rounded-tl-xl">
-                        <div class="flex items-center justify-between text-sm w-[150px]">
-                            <button onclick="changeMonth(-1)"
-                                class="hover:text-v-radiant transition-colors text-lg">&lt;</button>
-                            <span id="month-display" class="text-center text-v-radiant flex-1">Marzo</span>
-                            <button onclick="changeMonth(1)"
-                                class="hover:text-v-radiant transition-colors text-lg">&gt;</button>
-                        </div>
-                        <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
-                    </th>
-                    <!-- JS will populate the rest -->
-                </tr>
-            </thead>
-            <tbody id="tasks-body"></tbody>
+                            <div class="flex items-center justify-between text-sm w-[150px]">
+                                <button onclick="changeMonth(-1)"
+                                    class="hover:text-v-radiant transition-colors text-lg">&lt;</button>
+                                <span id="month-display" class="text-center text-v-radiant flex-1">Marzo</span>
+                                <button onclick="changeMonth(1)"
+                                    class="hover:text-v-radiant transition-colors text-lg">&gt;</button>
+                            </div>
+                            <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
+                        </th>
+                        <!-- JS will populate the rest -->
+                    </tr>
+                </thead>
+                <tbody id="tasks-body"></tbody>
             </table>
         </div>
     </div>
@@ -174,6 +195,14 @@
             { name: "VT DOTTS VALORANT HARD", color: "v-aurora", initial: 3200 },
             { name: "VT FOURSHOT ADAPTIVE VALORANT", color: "v-angelic", initial: 1575 }
         ];
+
+        function getBlockSizes(days) {
+            if (days === 28) return [4, 4, 4, 4, 4, 4, 4];
+            if (days === 29) return [4, 4, 4, 4, 4, 4, 5];
+            if (days === 30) return [4, 4, 4, 4, 4, 5, 5];
+            if (days === 31) return [4, 4, 4, 4, 5, 5, 5];
+            return [4]; // fallback
+        }
 
         function changeMonth(delta) {
             currentDate.setMonth(currentDate.getMonth() + delta);
@@ -227,19 +256,18 @@
 
             while (headerRow.children.length > 1) headerRow.removeChild(headerRow.lastChild);
 
+            const blockSizes = getBlockSizes(daysInMonth);
             let headerHtml = '';
-            const totalBlocks = Math.ceil(daysInMonth / 5);
-            for (let block = 0; block < totalBlocks; block++) {
-                for (let day = 1; day <= 5; day++) {
-                    const dayNum = (block * 5) + day;
-                    if (dayNum > daysInMonth) break;
+            let currentDay = 1;
+            blockSizes.forEach(size => {
+                for (let i = 0; i < size; i++) {
                     headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase">
-                        DAY ${dayNum}
+                        DAY ${currentDay++}
                         <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
                     </th>`;
                 }
                 headerHtml += `<th onclick="toggleRanks()" class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 ${ranksCollapsed ? 'collapsed' : ''}">1%</th>`;
-            }
+            });
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
             let bodyHtml = '';
@@ -256,16 +284,14 @@
                         </div>
                     </td>`;
 
-                for (let block = 0; block < totalBlocks; block++) {
-                    for (let day = 1; day <= 5; day++) {
-                        const dayNum = (block * 5) + day;
-                        if (dayNum > daysInMonth) break;
+                blockSizes.forEach(size => {
+                    for (let i = 0; i < size; i++) {
                         bodyHtml += `<td class="cell w-day !p-0"><div class="flex items-center justify-center h-full"><div contenteditable="true" class="outline-none w-full text-center"></div></div></td>`;
                     }
                     bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} ${ranksCollapsed ? 'collapsed' : ''}">
                         <span class="text-[10px] font-bold">▲R</span>
                     </td>`;
-                }
+                });
                 bodyHtml += `</tr>`;
             });
             tbody.innerHTML = bodyHtml;
