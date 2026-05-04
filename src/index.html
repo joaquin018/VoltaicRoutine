@@ -47,7 +47,7 @@
                 width: var(--scenario-width);
                 min-width: var(--scenario-width);
                 max-width: var(--scenario-width);
-                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700;
+                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700 overflow-hidden;
             }
             .w-day { 
                 width: var(--day-width);
@@ -193,8 +193,8 @@
                 const goalValue = (task.initial * 1.01).toFixed(1);
                 bodyHtml += `<tr class="hover:bg-white/5 transition-colors group">
                     <td class="cell w-scenario group-hover:bg-slate-800 transition-colors">
-                        <div class="flex flex-col gap-1">
-                            <div contenteditable="true" class="outline-none focus:text-v-rank-gold transition-colors">${task.name}</div>
+                        <div class="flex flex-col gap-1 overflow-hidden">
+                            <div contenteditable="true" class="outline-none focus:text-v-rank-gold transition-colors truncate">${task.name}</div>
                             <div class="flex gap-3 text-[9px] font-normal text-slate-500 uppercase tracking-tighter">
                                 <span class="bg-black/30 px-1 rounded-sm">Init: <span contenteditable="true" class="text-slate-300 outline-none">${task.initial}</span></span>
                                 <span class="bg-black/30 px-1 rounded-sm">Goal: <span contenteditable="true" class="text-v-rank-gold outline-none">${goalValue}</span></span>
