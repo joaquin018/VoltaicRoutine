@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -78,20 +81,25 @@
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
+
 <body class="bg-v-main text-slate-100 font-sans text-[12px] antialiased select-none">
     <div class="p-5 min-w-[4000px]">
         <table class="table-fixed border-separate border-spacing-0 border-t border-l border-v-border">
             <thead class="sticky top-0 z-10">
                 <tr id="header-row-1">
-                    <th class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest !text-left pl-4">
-                        <div class="flex items-center justify-between text-sm w-[240px]">
-                            <button onclick="changeMonth(-1)" class="hover:text-v-rank-gold transition-colors text-lg">&lt;</button>
+                    <th
+                        class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-rank-red h-14 uppercase tracking-widest !text-left pl-4">
+                        <div class="flex items-center justify-between text-sm w-[150px]">
+                            <button onclick="changeMonth(-1)"
+                                class="hover:text-v-rank-gold transition-colors text-lg">&lt;</button>
                             <span id="month-display" class="text-center text-v-rank-gold flex-1">Marzo</span>
-                            <button onclick="changeMonth(1)" class="hover:text-v-rank-gold transition-colors text-lg">&gt;</button>
+                            <button onclick="changeMonth(1)"
+                                class="hover:text-v-rank-gold transition-colors text-lg">&gt;</button>
                         </div>
                         <div class="resize-handle" onmousedown="startResize(event, 'scenario')"></div>
                     </th>
-                    <th class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <th
+                        class="cell w-[60px] bg-v-surface/95 backdrop-blur-md text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         Play
                     </th>
                     <!-- JS will populate the rest -->
@@ -105,7 +113,7 @@
         const months = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sept.", "oct.", "nov.", "dic."];
         let currentDate = new Date();
         let ranksCollapsed = false;
-        
+
         const tasks = [
             { name: "1. VT FLOATSHOT VALORANT HARD", color: "v-rank-gold", initial: 1250 },
             { name: "2. VT ANGLESHOT VALORANT HARD", color: "v-rank-gold", initial: 1300 },
@@ -133,7 +141,7 @@
             resizeType = type;
             startX = e.pageX;
             startWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue(type === 'day' ? '--day-width' : '--scenario-width'));
-            
+
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', stopResize);
             document.body.classList.add('cursor-col-resize');
@@ -194,7 +202,7 @@
                         </div>
                     </th>
                     <td class="cell w-[60px]"><div class="play-icon text-${task.color}"></div></td>`;
-                
+
                 for (let block = 0; block < totalBlocks; block++) {
                     for (let day = 1; day <= 5; day++) {
                         const dayNum = (block * 5) + day;
@@ -211,4 +219,5 @@
         render();
     </script>
 </body>
+
 </html>
