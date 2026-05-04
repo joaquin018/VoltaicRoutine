@@ -259,6 +259,9 @@
         const months = ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sept.", "oct.", "nov.", "dic."];
         let currentDate = new Date();
         let ranksCollapsed = false;
+        
+        // Disable context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
 
         let tasks = [];
         let columnSettings = {};
