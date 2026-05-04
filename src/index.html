@@ -541,14 +541,21 @@
                     </td>`;
 
                 let dayIndex = 1;
+                let currentGoal = parseFloat(goalValue);
+                
                 blockSizes.forEach((size, blockIndex) => {
+                    let blockSum = 0;
+                    let blockCount = 0;
+
                     for (let i = 0; i < size; i++) {
                         const currentValStr = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
                         const currentVal = parseFloat(currentValStr);
                         let cellClass = "";
                         
                         if (!isNaN(currentVal) && currentValStr !== '') {
-                            if (currentVal >= parseFloat(goalValue)) {
+                            blockSum += currentVal;
+                            blockCount++;
+                            if (currentVal >= currentGoal) {
                                 cellClass = "bg-v-angelic/20";
                             } else {
                                 cellClass = "bg-v-aurora/20";
@@ -562,10 +569,21 @@
                         </td>`;
                         dayIndex++;
                     }
+
                     if (blockIndex < blockSizes.length - 1) {
-                        const currentStat = (task.stats && task.stats[blockIndex]) !== undefined ? task.stats[blockIndex] : '1%';
-                        bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
-                            <div contenteditable="true" onblur="validatePercent(this); updateStat(${taskIndex}, ${blockIndex}, this.innerText)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold whitespace-nowrap">${currentStat}</div>
+                        const blockAvg = blockCount > 0 ? (blockSum / blockCount) : 0;
+                        const blockTargetStr = (task.stats && task.stats[blockIndex]) !== undefined ? task.stats[blockIndex] : targetPercent.toString();
+                        const blockTarget = parseFloat(blockTargetStr.replace('%', '')) || 0;
+
+                        if (blockAvg > 0) {
+                            currentGoal = parseFloat((blockAvg * (1 + blockTarget / 100)).toFixed(1));
+                        }
+                        
+                        bodyHtml += `<td class="cell w-stat !bg-[#6366f120] !text-[#6366f1] overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
+                            <div class="flex flex-col items-center justify-center h-full gap-1">
+                                <div contenteditable="true" onblur="validatePercent(this); updateStat(${taskIndex}, ${blockIndex}, this.innerText); render()" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[9px] opacity-60 hover:opacity-100 transition-opacity whitespace-nowrap">${blockTarget}%</div>
+                                <div class="w-full text-center text-[10px] font-bold whitespace-nowrap">${currentGoal}</div>
+                            </div>
                         </td>`;
                     }
                 });
