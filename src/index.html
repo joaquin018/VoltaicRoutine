@@ -543,8 +543,23 @@
                 let dayIndex = 1;
                 blockSizes.forEach((size, blockIndex) => {
                     for (let i = 0; i < size; i++) {
-                        const currentVal = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
-                        bodyHtml += `<td class="cell w-day !p-0 overflow-hidden"><div class="flex items-center justify-center h-full px-2"><div contenteditable="true" onblur="updateDay(${taskIndex}, ${dayIndex}, this.innerText)" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden">${currentVal}</div></div></td>`;
+                        const currentValStr = (task.days && task.days[dayIndex]) !== undefined ? task.days[dayIndex] : '';
+                        const currentVal = parseFloat(currentValStr);
+                        let cellClass = "";
+                        
+                        if (!isNaN(currentVal) && currentValStr !== '') {
+                            if (currentVal >= parseFloat(goalValue)) {
+                                cellClass = "bg-emerald-500/20 text-emerald-400";
+                            } else {
+                                cellClass = "bg-v-aurora/20 text-v-aurora";
+                            }
+                        }
+
+                        bodyHtml += `<td class="cell w-day !p-0 overflow-hidden ${cellClass}">
+                            <div class="flex items-center justify-center h-full px-2">
+                                <div contenteditable="true" onblur="updateDay(${taskIndex}, ${dayIndex}, this.innerText); render()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden">${currentValStr}</div>
+                            </div>
+                        </td>`;
                         dayIndex++;
                     }
                     if (blockIndex < blockSizes.length - 1) {
