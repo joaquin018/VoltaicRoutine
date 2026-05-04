@@ -88,18 +88,29 @@
         }
 
         .w-stat.collapsed {
-            width: 10px !important;
-            min-width: 10px !important;
+            width: 1px !important;
+            min-width: 1px !important;
             padding: 0 !important;
-            border-right: 3px solid #df3e7b;
+            border-right: 1px solid #df3e7b;
             cursor: pointer;
-            overflow: hidden;
+            overflow: visible;
             font-size: 0;
-            background-color: rgba(223, 62, 123, 0.4);
+            background: none !important;
             clip-path: none !important;
+            position: relative;
+        }
+        /* Hit area for clicking the 1px line */
+        .w-stat.collapsed::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -10px;
+            width: 20px;
+            height: 100%;
+            z-index: 20;
         }
         .w-stat.collapsed:hover {
-            background-color: rgba(223, 62, 123, 0.8);
+            border-right: 2px solid #ffffff;
         }
 
         .w-stat.collapsed * { display: none; }
