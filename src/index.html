@@ -268,16 +268,18 @@
             const blockSizes = getBlockSizes(daysInMonth);
             let headerHtml = '';
             let currentDay = 1;
-            blockSizes.forEach(size => {
+            blockSizes.forEach((size, index) => {
                 for (let i = 0; i < size; i++) {
                     headerHtml += `<th class="cell w-day bg-v-surface/95 backdrop-blur-md text-[8px] text-slate-400 uppercase">
                         DAY<br>${currentDay++}
                         <div class="resize-handle" onmousedown="startResize(event, 'day')"></div>
                     </th>`;
                 }
-                headerHtml += `<th class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}" onclick="if(event.target === this) toggleRanks()">
-                    <div contenteditable="true" onblur="validatePercent(this)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none whitespace-nowrap">1%</div>
-                </th>`;
+                if (index < blockSizes.length - 1) {
+                    headerHtml += `<th class="cell w-stat !bg-v-aurora/20 border-v-border cursor-pointer hover:bg-v-aurora/40 overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}" onclick="if(event.target === this) toggleRanks()">
+                        <div contenteditable="true" onblur="validatePercent(this)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none whitespace-nowrap">1%</div>
+                    </th>`;
+                }
             });
             headerRow.insertAdjacentHTML('beforeend', headerHtml);
 
@@ -295,13 +297,15 @@
                         </div>
                     </td>`;
 
-                blockSizes.forEach(size => {
+                blockSizes.forEach((size, index) => {
                     for (let i = 0; i < size; i++) {
                         bodyHtml += `<td class="cell w-day !p-0 overflow-hidden"><div class="flex items-center justify-center h-full px-2"><div contenteditable="true" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" class="outline-none w-full text-center whitespace-nowrap overflow-hidden"></div></div></td>`;
                     }
-                    bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
-                        <div contenteditable="true" onblur="validatePercent(this)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold whitespace-nowrap">1%</div>
-                    </td>`;
+                    if (index < blockSizes.length - 1) {
+                        bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} overflow-hidden ${ranksCollapsed ? 'collapsed' : ''}">
+                            <div contenteditable="true" onblur="validatePercent(this)" oninput="if(parseFloat(this.innerText) > 100) { this.innerText = '100'; window.getSelection().selectAllChildren(this); window.getSelection().collapseToEnd(); }" onkeydown="if(this.innerText.length >= 5 && event.key.length === 1) event.preventDefault()" onkeypress="return (event.charCode >= 48 && event.charCode <= 57) || event.charCode === 46" class="outline-none w-full text-center text-[10px] font-bold whitespace-nowrap">1%</div>
+                        </td>`;
+                    }
                 });
                 bodyHtml += `</tr>`;
             });
