@@ -16,15 +16,15 @@
             theme: {
                 extend: {
                     colors: {
-                        'v-main': '#05070a',
-                        'v-surface': '#0f172a',
-                        'v-header': '#1e293b',
-                        'v-rank-red': '#e11d48',
-                        'v-rank-gold': '#eab308',
-                        'v-rank-blue': '#3b82f6',
-                        'v-rank-green': '#22c55e',
-                        'v-rank-purple': '#a855f7',
-                        'v-border': 'rgba(255, 255, 255, 0.08)',
+                        'v-main': '#0c0c0c',
+                        'v-surface': '#141414',
+                        'v-header': '#1a1a1a',
+                        'v-radiant': '#c29a4a',
+                        'v-elysian': '#5b6ee1',
+                        'v-aurora': '#df3e7b',
+                        'v-angelic': '#7ed3f2',
+                        'v-energy': '#d97706',
+                        'v-border': 'rgba(255, 255, 255, 0.05)',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -39,23 +39,26 @@
             :root {
                 --day-width: 60px;
                 --scenario-width: 260px;
+                --v-rank-red: #df3e7b; /* Using Aurora for the red accents */
             }
             .cell {
-                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px] relative;
+                @apply border-r border-b border-v-border px-3 py-4 text-center whitespace-nowrap h-[80px] relative transition-colors;
             }
             .w-scenario {
                 width: var(--scenario-width);
                 min-width: var(--scenario-width);
                 max-width: var(--scenario-width);
-                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r-2 border-slate-700 overflow-hidden;
+                @apply text-sm text-left pl-4 bg-v-surface font-bold sticky left-0 z-[5] border-r border-white/10 overflow-hidden;
             }
             .w-day { 
                 width: var(--day-width);
                 min-width: var(--day-width);
-                @apply font-mono text-[11px] text-white uppercase; 
+                max-width: var(--day-width);
+                @apply font-mono text-[11px] text-slate-300 uppercase; 
             }
             .w-stat { 
-                @apply w-[45px] text-white font-black text-[12px] bg-red-900/80 transition-all duration-300; 
+                @apply w-[45px] text-white font-black text-[12px] bg-v-aurora/20 transition-all duration-300; 
+                clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); /* Slanted look from image */
             }
             .w-stat.collapsed {
                 @apply w-0 min-w-0 px-0 border-r border-v-rank-red overflow-hidden p-0;
@@ -111,10 +114,10 @@
         let ranksCollapsed = false;
 
         const tasks = [
-            { name: "1. VT FLOATSHOT VALORANT HARD", color: "v-rank-gold", initial: 1250 },
-            { name: "2. VT ANGLESHOT VALORANT HARD", color: "v-rank-gold", initial: 1300 },
-            { name: "4. VT DOTTS VALORANT HARD", color: "v-rank-red", initial: 3200 },
-            { name: "6. VT FOURSHOT ADAPTIVE VALORANT", color: "v-rank-purple", initial: 1575 }
+            { name: "VT FLOATSHOT VALORANT HARD", color: "v-radiant", initial: 1250 },
+            { name: "VT ANGLESHOT VALORANT HARD", color: "v-elysian", initial: 1300 },
+            { name: "VT DOTTS VALORANT HARD", color: "v-aurora", initial: 3200 },
+            { name: "VT FOURSHOT ADAPTIVE VALORANT", color: "v-angelic", initial: 1575 }
         ];
 
         function changeMonth(delta) {
@@ -204,7 +207,9 @@
                         if (dayNum > daysInMonth) break;
                         bodyHtml += `<td class="cell w-day"><div contenteditable="true" class="outline-none focus:bg-white/10 w-full h-full flex items-center justify-center"></div></td>`;
                     }
-                    bodyHtml += `<td class="cell w-stat ${ranksCollapsed ? 'collapsed' : ''}"><span class="text-[8px] mr-0.5">▲</span>R</td>`;
+                    bodyHtml += `<td class="cell w-stat !bg-${task.color}/20 !text-${task.color} ${ranksCollapsed ? 'collapsed' : ''}">
+                        <span class="text-[10px] font-bold">▲R</span>
+                    </td>`;
                 }
                 bodyHtml += `</tr>`;
             });
