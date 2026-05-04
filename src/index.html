@@ -21,7 +21,7 @@
                         'v-header': '#1a1a1a',
                         'v-radiant': '#c29a4a',
                         'v-elysian': '#5b6ee1',
-                        'v-aurora': '#6366f1', /* Indigo instead of loud pink */
+                        'v-aurora': '#df3e7b',
                         'v-angelic': '#7ed3f2',
                         'v-energy': '#d97706',
                         'v-border': '#ffffff0d',
@@ -38,7 +38,7 @@
         :root {
             --day-width: 60px;
             --scenario-width: 260px;
-            --v-aurora: #6366f1;
+            --v-aurora: #df3e7b;
         }
 
         .cell {
@@ -82,7 +82,7 @@
             color: white;
             font-weight: 900;
             font-size: 12px;
-            background-color: rgba(99, 102, 241, 0.2);
+            background-color: rgba(223, 62, 123, 0.2);
             transition: all 0.3s;
         }
 
@@ -90,7 +90,7 @@
             width: 1px !important;
             min-width: 1px !important;
             padding: 0 !important;
-            border-right: 1px solid var(--v-aurora);
+            border-right: 1px solid #6366f1;
             cursor: pointer;
             overflow: visible;
             font-size: 0;
@@ -140,7 +140,7 @@
                 <thead class="sticky top-0 z-10">
                     <tr id="header-row-1">
                         <th
-                            class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-v-aurora h-14 uppercase tracking-widest !text-left pl-4 rounded-tl-xl">
+                            class="cell w-scenario bg-v-surface/95 backdrop-blur-md border-b-2 border-b-[#6366f1] h-14 uppercase tracking-widest !text-left pl-4 rounded-tl-xl">
                         <div class="flex items-center justify-between text-sm w-[150px]">
                             <button onclick="changeMonth(-1)"
                                 class="hover:text-v-radiant transition-colors text-lg">&lt;</button>
